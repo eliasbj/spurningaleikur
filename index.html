@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="is">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Spurningaleikurinn</title>
+<style>
+:root{--ink:#2b2350;--bg1:#ffe66d;--bg2:#ff9ecb;--ok:#2fbf71;--bad:#ff6b6b;--card:#fffdf6}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%}
+body{font-family:"Trebuchet MS","Comic Sans MS",system-ui,sans-serif;color:var(--ink);background:linear-gradient(160deg,var(--bg1),var(--bg2));background-attachment:fixed;padding:20px 14px 60px}
+main{max-width:920px;margin:0 auto}
+h1{font-size:clamp(2rem,6vw,3.4rem);margin:8px 0 4px;text-align:center;letter-spacing:.5px;text-shadow:3px 3px 0 #fff}
+.sub{text-align:center;font-size:1.2rem;margin:0 0 22px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px}
+.cat{border:0;border-radius:22px;padding:18px 12px;color:#fff;font:inherit;font-size:1.15rem;font-weight:700;cursor:pointer;box-shadow:0 6px 0 rgba(0,0,0,.2);transition:transform .15s,box-shadow .15s;display:flex;flex-direction:column;align-items:center;gap:6px;min-height:130px;justify-content:center}
+.cat span{font-size:2.6rem}
+.cat:hover,.cat:focus-visible{transform:translateY(-4px) rotate(-1.5deg);box-shadow:0 10px 0 rgba(0,0,0,.2);outline:3px solid #fff}
+.cat:active{transform:translateY(3px);box-shadow:0 2px 0 rgba(0,0,0,.2)}
+.panel{background:var(--card);border-radius:26px;padding:22px;box-shadow:0 8px 0 rgba(0,0,0,.15)}
+.top{display:flex;justify-content:space-between;align-items:center;font-weight:700;margin-bottom:12px;gap:10px}
+.bar{height:14px;background:#eadfff;border-radius:99px;overflow:hidden;margin-bottom:18px}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,#7c5cff,#ff5fa2);width:0;transition:width .4s}
+.q{font-size:clamp(1.3rem,3.6vw,1.9rem);font-weight:800;margin:0 0 18px;line-height:1.3}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:560px){.opts{grid-template-columns:1fr}}
+.opt{font:inherit;font-size:1.15rem;font-weight:700;padding:16px 12px;border-radius:18px;border:3px solid #d9ccff;background:#fff;color:var(--ink);cursor:pointer;transition:transform .12s;min-height:64px}
+.opt:hover:not(:disabled),.opt:focus-visible{transform:scale(1.03);border-color:#7c5cff}
+.opt:disabled{cursor:default}
+.opt.right{background:var(--ok);border-color:#1f9a58;color:#fff;animation:pop .5s}
+.opt.wrong{background:var(--bad);border-color:#d64545;color:#fff;animation:shake .4s}
+.opt.dim{opacity:.55}
+.fb{display:flex;align-items:center;gap:14px;margin-top:18px;min-height:90px}
+.mascot{font-size:4.2rem;line-height:1}
+.mascot.in{animation:bounce .7s}
+.bubble{background:#fff;border:3px solid var(--ink);border-radius:20px;padding:10px 16px;font-size:1.25rem;font-weight:800;position:relative}
+.bubble.ok{background:#d9fbe7}
+.bubble.no{background:#ffe3e3}
+.btn{font:inherit;font-size:1.2rem;font-weight:800;border:0;border-radius:99px;padding:14px 28px;background:#7c5cff;color:#fff;cursor:pointer;box-shadow:0 5px 0 #4a30c9}
+.btn:hover{filter:brightness(1.08)}
+.btn:active{transform:translateY(3px);box-shadow:0 2px 0 #4a30c9}
+.btn.ghost{background:#fff;color:var(--ink);box-shadow:0 5px 0 #cfc3f5;border:3px solid #cfc3f5}
+.row{display:flex;gap:12px;justify-content:flex-end;margin-top:16px;flex-wrap:wrap}
+.end{text-align:center}
+.end .big{font-size:5rem}
+.end h2{font-size:2.2rem;margin:6px 0}
+.stars{font-size:2.6rem;letter-spacing:6px}
+.link{background:none;border:0;font:inherit;font-weight:700;color:var(--ink);cursor:pointer;text-decoration:underline}
+.who{display:flex;gap:12px;align-items:center;justify-content:center;flex-wrap:wrap;margin-bottom:18px;padding:14px 18px}
+.who label{font-weight:800;font-size:1.2rem}
+.who input{font:inherit;font-size:1.2rem;font-weight:700;padding:12px 16px;border-radius:99px;border:3px solid #cfc3f5;color:var(--ink);min-width:230px}
+.who input:focus{outline:3px solid #7c5cff}
+.who.shake{animation:shake .4s}
+.board{margin-top:22px}
+.board h2{margin:0 0 10px;text-align:center}
+.board ol{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.board li{display:flex;gap:10px;align-items:center;background:#fff;border-radius:16px;padding:10px 14px;font-weight:700;font-size:1.1rem}
+.board li b{flex:1;overflow:hidden;text-overflow:ellipsis}
+.board li small{font-weight:600;opacity:.7}
+.board li.me{background:#fff1a8}
+.board .none{text-align:center;opacity:.7;margin:0}
+.btn.big{font-size:1.8rem;padding:18px 44px}
+.hide{display:none!important}
+#fx{position:fixed;inset:0;pointer-events:none;z-index:50}
+.float{position:fixed;bottom:-60px;font-size:3rem;z-index:49;pointer-events:none;animation:rise 2.6s ease-out forwards}
+@keyframes rise{to{transform:translateY(-105vh) rotate(25deg);opacity:.9}}
+@keyframes pop{50%{transform:scale(1.08)}}
+@keyframes shake{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+@keyframes bounce{0%{transform:scale(.3) rotate(-20deg)}60%{transform:scale(1.25) rotate(8deg)}100%{transform:scale(1)}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.float{display:none}}
+</style>
+</head>
+<body>
+<canvas id="fx"></canvas>
+<main>
+  <section id="home">
+    <h1>🎈 Spurningaleikurinn! 🎈</h1>
+    <p class="sub">Skrifaðu nafnið þitt og sýndu hvað þú kannt!</p>
+    <div class="panel who" id="who"><label for="name">Hvað heitir þú?</label><input id="name" maxlength="20" autocomplete="off" list="known" placeholder="Skrifaðu nafnið þitt"><datalist id="known"></datalist></div>
+    <div class="row" style="justify-content:center;margin:0"><button class="btn big" id="play">🎲 Byrja leik!</button></div>
+    <div class="panel board">
+      <h2>🏆 Stigatafla</h2>
+      <ol id="board"></ol>
+      <div class="row" style="justify-content:center"><button class="link" id="reset">Hreinsa stigatöflu</button></div>
+    </div>
+  </section>
+
+  <section id="game" class="panel hide">
+    <div class="top"><button class="link" id="back">← Til baka</button><span id="catname"></span><span id="score"></span></div>
+    <div class="bar"><i id="prog"></i></div>
+    <h2 class="q" id="q"></h2>
+    <div class="opts" id="opts"></div>
+    <div class="fb"><div class="mascot" id="mascot"></div><div class="bubble hide" id="msg"></div></div>
+    <div class="row"><button class="btn hide" id="next">Næsta spurning</button></div>
+  </section>
+
+  <section id="end" class="panel end hide">
+    <div class="big" id="endface"></div>
+    <h2 id="endtitle"></h2>
+    <p id="endtxt" style="font-size:1.3rem;margin:4px 0"></p>
+    <div class="stars" id="stars"></div>
+    <div class="row" style="justify-content:center;margin-top:20px">
+      <button class="btn" id="again">Spila aftur</button>
+      <button class="btn ghost" id="menu">Til baka á forsíðu</button>
+    </div>
+  </section>
+</main>
+
+<script>
+// Spurningar: [spurning, RÉTT svar, rangt, rangt, rangt]
+const C=[
+{n:"Disney teiknimyndir",e:"🏰",c:"#7c5cff",q:[
+["Hvað heitir snjókarlinn í Frozen?","Olaf","Sven","Hans","Kristoff"],
+["Hvað heitir fiskurinn sem týnist í Leitin að Nemó?","Nemó","Dóri","Bruce","Gill"],
+["Hvað heitir kamelljónið í Tangled (Rapunzel)?","Pascal","Flynn","Maximus","Gothel"],
+["Hvers konar leikfang er Buzz Lightyear í Toy Story?","Geimfari","Kúreki","Risaeðla","Hermaður"],
+["Hvað heitir hænan í Moana?","Heihei","Pua","Maui","Tamatoa"]]},
+{n:"Fjölskyldumyndir",e:"🎬",c:"#ff7a3d",q:[
+["Hvað vinnur Ace Ventura við?","Hann finnur týnd dýr","Hann slekkur elda","Hann bakar kökur","Hann flýgur þotum"],
+["Í hvaða íþrótt keppir jamaíska liðið í Cool Runnings?","Bobsleða","Sundi","Fótbolta","Hlaupi"],
+["Hvers konar dýr er Beethoven í bíómyndinni?","Stór hundur","Lítill köttur","Hestur","Kanína"],
+["Hvað gerist í Honey, I Shrunk the Kids?","Krakkarnir minnka","Krakkarnir fljúga","Krakkarnir verða ósýnileg","Krakkarnir verða risar"],
+["Hvaða lit fær andlitið á manninum þegar hann setur upp Mask (Grímuna)?","Grænt","Rautt","Blátt","Gult"]]},
+{n:"Fimleikar",e:"🤸",c:"#e8478b",q:[
+["Hvað heitir mjóa sláin sem fimleikafólk gengur og stekkur á?","Jafnvægisslá","Tvíslá","Hringir","Stökkhestur"],
+["Hvað heitir það þegar maður snýr heilan hring í loftinu?","Heljarstökk","Kollhnís","Brú","Splitt"],
+["Hvað heitir það þegar fæturnir fara í sundur eins og beina línu?","Splitt","Hjólhestur","Hnébeygja","Armbeygja"],
+["Hvað er gott að gera áður en maður byrjar á æfingu?","Hita upp","Sofa","Borða nammi","Horfa á sjónvarpið"],
+["Hvaða tæki er notað í fimleikum og er með tvær slár í mismunandi hæð?","Tvíslá","Trampólín","Hnefaleikapoki","Rennibraut"]]},
+{n:"Matur",e:"🍕",c:"#2fa36b",q:[
+["Hvaða ávöxtur er gulur og bogadreginn?","Banani","Epli","Vínber","Jarðarber"],
+["Hvað heitir íslenski mjólkurmaturinn sem er líkur jógúrt?","Skyr","Ostur","Smjör","Rjómi"],
+["Úr hverju er súkkulaði búið til?","Kakóbaunum","Kartöflum","Hnetusmjöri","Hveiti"],
+["Hvaða grænmeti er appelsínugult og kanínur elska?","Gulrót","Agúrka","Brokkolí","Paprika"],
+["Frá hvaða landi er pítsan upprunnin?","Ítalíu","Íslandi","Japan","Mexíkó"]]},
+{n:"Fótbolti",e:"⚽",c:"#1e90d6",q:[
+["Hvað eru margir leikmenn í hverju liði inni á vellinum?","11","9","7","15"],
+["Hvaða lit hefur spjaldið sem dómarinn gefur þegar leikmaður er rekinn af velli?","Rautt","Gult","Blátt","Grænt"],
+["Hvað kallast það þegar skorað er mark með höfðinu?","Skallamark","Hornspyrna","Vítaspyrna","Innkast"],
+["Hvaða land varð heimsmeistari karla árið 2022?","Argentína","Frakkland","Brasilía","Ísland"],
+["Hvað heitir sá leikmaður sem má snerta boltann með höndunum inni í teignum?","Markvörður","Framherji","Miðjumaður","Dómari"]]},
+{n:"Barnabækur",e:"📚",c:"#9b59d0",q:[
+["Hvað er Hundmann?","Hálfur hundur og hálfur lögga","Hálfur köttur og hálfur kokkur","Hálfur api og hálfur læknir","Hálfur fugl og hálfur kennari"],
+["Í hverju er Kafteinn Ofurbrók frægur fyrir að vera?","Nærbuxum og skikkju","Jakkafötum","Sundskýlu og snorkli","Riddarabúningi"],
+["Hvað heitir skólinn sem Harry Potter fer í?","Hogwarts","Narnía","Hobbitaskóli","Töfraskólinn Bláskógar"],
+["Hvað er Lína Langsokkur þekkt fyrir að vera?","Sterkasta stelpa í heimi","Besti kokkur í heimi","Hraðasti hlauparinn","Sú gáfaðasta í bekknum"],
+["Hver skrifaði bækurnar um Harry Potter?","J.K. Rowling","Astrid Lindgren","Roald Dahl","Dav Pilkey"]]},
+{n:"Vörumerki",e:"🏷️",c:"#d4a017",q:[
+["Hvaða skyndibitastaður er með gulan bogadreginn M-staf?","McDonald’s","Subway","KFC","Dominos"],
+["Hvaða íþróttamerki er með hak (swoosh) sem merki?","Nike","Puma","Adidas","Umbro"],
+["Frá hvaða landi er LEGO?","Danmörku","Íslandi","Bandaríkjunum","Kína"],
+["Hvaða fyrirtæki býr til iPhone símana?","Apple","Samsung","Nokia","Sony"],
+["Hvaða fyrirtæki býr til PlayStation?","Sony","Nintendo","Microsoft","Sega"]]},
+{n:"Nýliðnir atburðir",e:"🌍",c:"#17a2b8",q:[
+["Í hvaða landi voru Ólympíuleikarnir 2024 haldnir?","Frakklandi","Japan","Íslandi","Brasilíu"],
+["Hvaða bær á Reykjanesi hefur þurft að rýma vegna eldgosa?","Grindavík","Akureyri","Egilsstaðir","Ísafjörður"],
+["Í hvaða landi var HM karla í fótbolta haldið árið 2022?","Katar","Spánn","Kanada","Noregur"],
+["Í hvaða landi var EM kvenna í fótbolta haldið sumarið 2025?","Sviss","Ísland","Ástralía","Japan"],
+["Hvaða vinsæla bíómynd frá 2023 fjallar um dúkku sem býr í Barbílandi?","Barbie","Frozen","Moana","Shrek"]]}
+];
+const ROUND=15; // fjöldi spurninga í hverjum leik
+const MORE=[
+[ // Disney
+["Hvaða prinsessa missir glerskó á dansleik?","Öskubuska","Þyrnirós","Ariel","Jasmín"],
+["Hvað heitir fíllinn sem getur flogið með eyrunum?","Dúmbó","Baloo","Bambi","Tantor"],
+["Hvers konar dýr er Bambi?","Dádýr","Kanína","Íkorni","Hestur"],
+["Hvað heitir illmennið með krókinn í Pétri Pan?","Kapteinn Krókur","Svartskeggur","Jack Sparrow","Skari"],
+["Hvað heitir stúlkan sem er læst inni í turni og er með mjög sítt hár?","Rapunzel","Mjallhvít","Belle","Mulan"],
+["Hvað heitir bangsinn sem elskar hunang?","Bangsímon","Baloo","Paddington","Bósi"],
+["Hvað heitir hafmeyjan í Litlu hafmeyjunni?","Ariel","Elsa","Anna","Merida"],
+["Hvers konar farartæki er Lightning McQueen í Cars?","Kappakstursbíll","Flugvél","Lest","Vörubíll"],
+["Hvernig bjargar Mulan pabba sínum?","Þykist vera hermaður","Bakar köku","Fer til tunglsins","Gerist sjóræningi"],
+["Hvað borðar Mjallhvít sem er eitrað?","Epli","Pera","Banana","Köku"]],
+[ // Fjölskyldumyndir
+["Hvað heitir strákurinn sem gleymist einn heima í Home Alone?","Kevin","Max","Tommi","Jakob"],
+["Hvað gerist þegar börnin spila Jumanji?","Hætturnar úr spilinu verða raunverulegar","Þau fá fullt af peningum","Þau sofna í viku","Þau verða ósýnileg"],
+["Hvaða ofurkraft hefur Matilda?","Hún getur hreyft hluti með hugsun","Hún getur flogið","Hún getur orðið ósýnileg","Hún getur talað við fiska"],
+["Hvaða dýr er Willy í Free Willy?","Háhyrningur","Höfrungur","Hákarl","Selur"],
+["Hvaða dýr er Babe í bíómyndinni Babe?","Grís","Hundur","Kind","Hestur"],
+["Hvað heitir maðurinn sem á súkkulaðiverksmiðjuna í Kalli og súkkulaðiverksmiðjan?","Willy Wonka","Ace Ventura","Kevin","Beethoven"],
+["Hvað finnst Paddington bangsa best að borða?","Marmelaðisamloku","Pítsu","Skyr","Pylsur"],
+["Hvað gerist á safninu á nóttunni í Night at the Museum?","Safngripirnir lifna við","Safnið flýgur af stað","Allir hverfa","Safnið fyllist af vatni"],
+["Hvaða lit er Shrek?","Grænn","Blár","Fjólublár","Rauður"],
+["Hvað notar Mary Poppins til að svífa um loftið?","Regnhlíf","Kúst","Teppi","Flugvél"]],
+[ // Fimleikar
+["Hvað heitir tækið sem fimleikafólk hleypur að og stekkur yfir?","Stökkhestur","Jafnvægisslá","Tvíslá","Hringir"],
+["Hvað kallast sá sem kennir í fimleikum?","Þjálfari","Dómari","Kokkur","Markvörður"],
+["Hvað heitir það þegar maður stendur á höndum?","Handstaða","Kollhnís","Brú","Splitt"],
+["Hvað heitir það þegar maður veltir sér áfram með höfuðið niður?","Kollhnís","Heljarstökk","Handstaða","Splitt"],
+["Til hvers er mjúka dýnan í fimleikum?","Að mýkja lendingar","Að sofa á henni","Að borða á henni","Að mála á henni"],
+["Hvað setja fimleikakrakkar á hendurnar til að fá betra grip?","Krít","Sápu","Olíu","Sykur"],
+["Hvað heitir bandaríska fimleikakonan sem hefur unnið fjölda Ólympíuverðlauna?","Simone Biles","Serena Williams","Katie Ledecky","Megan Rapinoe"],
+["Hvaða tæki hangir í loftinu á tveimur böndum og er haldið í með höndunum?","Hringir","Tvíslá","Jafnvægisslá","Trampólín"],
+["Hvers vegna teygja fimleikakrakkar?","Til að verða liðug og meiða sig ekki","Til að verða hærri","Til að verða léttari","Til að sofna"],
+["Á hvað stökkva krakkar til að komast hátt upp í loftið?","Trampólín","Hjól","Bát","Brú"]],
+[ // Matur
+["Hvaða mat býr býflugan til?","Hunang","Smjör","Sultu","Sykur"],
+["Úr hverju er pasta aðallega gert?","Hveiti","Fiski","Rjóma","Kartöflum"],
+["Hvaða grænmeti getur látið mann gráta þegar það er skorið?","Laukur","Gúrka","Gulrót","Tómatur"],
+["Hvað er borðað á bolludegi?","Rjómabollur","Hamborgarar","Pítsa","Skyr"],
+["Hvað heita þunnu gullnu kartöflustrimlarnir sem fylgja oft hamborgara?","Franskar","Pylsur","Hrísgrjón","Súpa"],
+["Hvaða matur er borinn fram í pylsubrauði?","Pylsa","Súpa","Skyr","Ís"],
+["Hvaða ávöxtur á að halda lækninum í burtu ef maður borðar einn á dag?","Epli","Appelsína","Banani","Melóna"],
+["Úr hverju er sushi oft gert?","Hrísgrjónum og fiski","Pasta og osti","Brauði og skinku","Kartöflum og kjöti"],
+["Hvað er hollt að borða á hverjum degi?","Grænmeti og ávexti","Bara nammi","Bara kex","Bara gos"],
+["Hvaða mjólkurafurð verður til þegar rjómi er þeyttur lengi?","Smjör","Skyr","Ostur","Jógúrt"]],
+[ // Fótbolti
+["Hvað heitir svæðið fyrir framan markið?","Vítateigur","Miðjuhringur","Hliðarlína","Bekkurinn"],
+["Hvað heitir spyrnan sem tekin er úr horni vallarins?","Hornspyrna","Aukaspyrna","Innkast","Vítaspyrna"],
+["Hvað notar dómarinn til að stöðva leikinn?","Flautu","Bjöllu","Trommu","Lúður"],
+["Hvað er venjulegur leikur hjá fullorðnum margar mínútur?","90","60","45","120"],
+["Hvað kallast sá sem skorar flest mörk á tímabilinu?","Markakóngur","Fyrirliði","Þjálfari","Línuvörður"],
+["Í hvaða lit er aðalbúningur íslenska landsliðsins?","Bláum","Rauðum","Grænum","Gulum"],
+["Hvað kallast það þegar boltanum er kastað inn eftir að hann fer út af hliðarlínu?","Innkast","Hornspyrna","Vítaspyrna","Rangstaða"],
+["Hvaða fótboltamaður er kallaður CR7?","Cristiano Ronaldo","Lionel Messi","Neymar","Kylian Mbappé"],
+["Fyrir hvaða land spilar Kylian Mbappé?","Frakkland","Spán","Ítalíu","Þýskaland"],
+["Hvað gerist ef boltinn fer allur yfir marklínuna og inn í markið?","Það er mark","Það er innkast","Það er hornspyrna","Það er rangstaða"]],
+[ // Barnabækur
+["Hver skrifaði Kalla og súkkulaðiverksmiðjuna?","Roald Dahl","J.K. Rowling","Dav Pilkey","Astrid Lindgren"],
+["Hvað heitir stóri rauði hundurinn í bókunum um Klifford?","Klifford","Snati","Lassie","Beethoven"],
+["Hvað heitir skrímslið sem músin hittir í skóginum í barnabókinni vinsælu?","Greppikló","Grýla","Bósi","Pési"],
+["Í hvað breytist svanga lirfan í lok bókarinnar?","Fiðrildi","Býflugu","Könguló","Bjöllu"],
+["Á hverju flýgur Harry Potter í Quidditch?","Kústskafti","Teppi","Skýi","Mottu"],
+["Hvaða lit eru Strumparnir?","Bláir","Rauðir","Grænir","Gulir"],
+["Í gegnum hvað fara börnin til Narníu?","Fataskáp","Spegil","Brunn","Regnbogann"],
+["Hvað heitir björninn í Jungle Book?","Baloo","Bangsímon","Paddington","Kubbi"],
+["Hvað heitir bókin um stelpuna sem eltir hvítu kanínuna niður í holu?","Lísa í Undralandi","Öskubuska","Rauðhetta","Mjallhvít"],
+["Hvað heitir aðalpersónan í Dagbók Kidda klaufa?","Kiddi","Hundmann","Harry","Pési"]],
+[ // Vörumerki
+["Hvaða gosdrykkur er með rauðan miða og er einn sá vinsælasti í heimi?","Coca-Cola","Pepsi","Sprite","Fanta"],
+["Hvaða íþróttamerki er með þrjár rendur?","Adidas","Nike","Puma","Umbro"],
+["Hvaða fyrirtæki býr til Barbie dúkkurnar?","Mattel","LEGO","Hasbro","Disney"],
+["Hvaða verslun er gul og blá og selur húsgögn og kjötbollur?","IKEA","Bónus","Elko","Rúmfatalagerinn"],
+["Hvaða verslun er með bleikan grís sem merki?","Bónus","Krónan","Hagkaup","Nettó"],
+["Hvaða fyrirtæki á YouTube?","Google","Apple","Microsoft","Netflix"],
+["Hvaða fyrirtæki býr til Mario leikina?","Nintendo","Sony","Sega","LEGO"],
+["Hvaða lit er merki Spotify?","Grænt","Rautt","Blátt","Gult"],
+["Hvaða bílamerki er með fjóra hringi tengda saman?","Audi","Toyota","Volvo","Ford"],
+["Hvaða kaffihúsakeðja er með græna hafmeyju sem merki?","Starbucks","McDonald’s","Subway","Dunkin’"]],
+[ // Nýliðnir atburðir
+["Hvað kallast veiran sem varð til þess að skólar lokuðu árið 2020?","Kórónaveira (COVID-19)","Hlaupabóla","Matareitrun","Lús"],
+["Hvað er ChatGPT?","Gervigreind sem spjallar og svarar spurningum","Nýr bíll","Fótboltalið","Tölvuleikur"],
+["Í hvaða landi voru Vetrarólympíuleikarnir 2022 haldnir?","Kína","Noregi","Japan","Íslandi"],
+["Hvað heitir framhaldið af Moana sem kom út 2024?","Moana 2","Frozen 3","Tangled 2","Brave 2"],
+["Hvað heitir ein af nýju tilfinningunum í Inside Out 2?","Kvíði (Anxiety)","Hungur","Hlátur","Svefn"],
+["Hvaða tölvuleikur varð að bíómynd árið 2025?","Minecraft","Fortnite","Roblox","Among Us"],
+["Hvar byrjaði eldgosið á Reykjanesskaga árið 2021?","Í Geldingadölum við Fagradalsfjall","Í Heklu","Í Eyjafjallajökli","Í Öskju"],
+["Hvað heitir græna nornin í bíómyndinni Wicked?","Elphaba","Glinda","Dorothy","Elsa"],
+["Hvað hét tónleikaferðalag Taylor Swift sem sló fjölda meta?","Eras Tour","Magic Tour","Pop Tour","Star Tour"],
+["Hvaða land varð heimsmeistari kvenna í fótbolta árið 2023?","Spánn","England","Bandaríkin","Ísland"]]
+];
+MORE.forEach((a,i)=>C[i].q.push(...a));
+C.forEach(c=>c.q.forEach(x=>x.cat=c));
+const GOOD=["Frábært! 🎉","Snilld!","Vá, þú ert snillingur!","Alveg rétt!","Glæsilegt!","Þú ert algjör stjarna!","Jibbí!"];
+const OOPS=["Næstum því! Prófaðu næstu 💪","Æi, ekki í þetta sinn!","Engar áhyggjur, þú getur þetta!","Góð tilraun! Áfram með þig!"];
+const HAPPY=["🦄","🐶","🐼","🦊","🐯","🐸","🐵","🦁"];
+const SAD=["🙈","🤗","🐻","🐣"];
+const FLY=["🌟","😎","🥳","👏","💖","🚀","🏆","🍭","🎈"];
+
+const $=id=>document.getElementById(id);
+const rnd=a=>a[Math.floor(Math.random()*a.length)];
+const shuffle=a=>{a=[...a];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+let list=[],idx=0,score=0,locked=false,mode=null,player="";
+
+// Geymsla (localStorage, vistast í þessum vafra á þessari tölvu)
+const KEY="spurningaleikur_v1";
+function load(){try{const d=JSON.parse(localStorage.getItem(KEY));if(d&&d.players)return d}catch(e){}return{players:{},last:""}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(db))}catch(e){}}
+let db=load();
+function findKey(n){return Object.keys(db.players).find(k=>k.toLowerCase()===n.toLowerCase())||n}
+function renderHome(){
+  const dl=$("known");dl.innerHTML="";
+  Object.keys(db.players).forEach(k=>{const o=document.createElement("option");o.value=k;dl.appendChild(o)});
+  const ol=$("board");ol.innerHTML="";
+  const arr=Object.entries(db.players).sort((a,b)=>b[1].total-a[1].total);
+  if(!arr.length){const p=document.createElement("p");p.className="none";p.textContent="Engin stig komin enn. Vertu fyrst!";ol.appendChild(p);return}
+  const cur=$("name").value.trim().toLowerCase();
+  arr.forEach(([k,v],i)=>{
+    const li=document.createElement("li");if(k.toLowerCase()===cur)li.className="me";
+    const medal=["🥇","🥈","🥉"][i]||(i+1)+".";
+    const nm=document.createElement("b");nm.textContent=medal+" "+k;
+    const sm=document.createElement("small");sm.textContent=v.games+(v.games===1?" leikur":" leikir");
+    const pt=document.createElement("span");pt.textContent="⭐ "+v.total;
+    li.append(nm,sm,pt);ol.appendChild(li);
+  });
+}
+$("name").value=db.last||"";
+$("name").addEventListener("input",renderHome);
+$("reset").onclick=()=>{if(confirm("Viltu virkilega eyða öllum stigum?")){db={players:{},last:""};save();$("name").value="";renderHome()}};
+
+$("play").onclick=()=>start();
+
+function show(id){["home","game","end"].forEach(x=>$(x).classList.toggle("hide",x!==id));window.scrollTo(0,0)}
+
+function start(){
+  const n=$("name").value.trim();
+  if(!n){const w=$("who");w.classList.remove("shake");void w.offsetWidth;w.classList.add("shake");$("name").focus();return}
+  player=findKey(n);db.last=player;save();
+  list=shuffle(C.flatMap(c=>c.q)).slice(0,ROUND);
+  idx=0;score=0;show("game");render();
+}
+
+function render(){
+  locked=false;
+  const q=list[idx];
+  $("q").textContent=q[0];
+  $("catname").textContent=player+" – "+q.cat.e+" "+q.cat.n;
+  $("score").textContent="⭐ "+score;
+  $("prog").style.width=(idx/list.length*100)+"%";
+  $("msg").classList.add("hide");
+  $("mascot").textContent="🤔";$("mascot").classList.remove("in");
+  $("next").classList.add("hide");
+  const box=$("opts");box.innerHTML="";
+  shuffle(q.slice(1).map((t,i)=>({t,ok:i===0}))).forEach(o=>{
+    const b=document.createElement("button");
+    b.className="opt";b.textContent=o.t;b.dataset.ok=o.ok?"1":"";
+    b.onclick=()=>answer(b,o.ok);
+    box.appendChild(b);
+  });
+}
+
+function answer(btn,ok){
+  if(locked)return;locked=true;
+  document.querySelectorAll(".opt").forEach(b=>{
+    b.disabled=true;
+    if(b.dataset.ok)b.classList.add("right");
+    else if(b!==btn)b.classList.add("dim");
+  });
+  const m=$("msg"),mas=$("mascot");
+  m.classList.remove("hide","ok","no");
+  if(ok){
+    score++;$("score").textContent="⭐ "+score;
+    m.textContent="✅ Rétt! "+rnd(GOOD);m.classList.add("ok");
+    mas.textContent=rnd(HAPPY);
+    confetti(140);floaters(7);
+  }else{
+    btn.classList.add("wrong");
+    m.textContent="❌ Rangt. "+rnd(OOPS);m.classList.add("no");
+    mas.textContent=rnd(SAD);
+  }
+  void mas.offsetWidth;mas.classList.add("in");
+  $("prog").style.width=((idx+1)/list.length*100)+"%";
+  const n=$("next");n.classList.remove("hide");
+  n.textContent=idx+1<list.length?"Næsta spurning":"Sjá útkomuna";
+  n.focus();
+}
+
+$("next").onclick=()=>{idx++;idx<list.length?render():finish()};
+$("back").onclick=()=>{renderHome();show("home")};
+$("menu").onclick=()=>{renderHome();show("home")};
+$("again").onclick=()=>start();
+
+function finish(){
+  const p=score/list.length;
+  const faces=p===1?"🏆":p>=.6?"🥳":p>=.3?"😊":"🤗";
+  $("endface").textContent=faces;
+  $("endtitle").textContent=p===1?"Fullt hús! Þú ert meistari!":p>=.6?"Frábær árangur!":p>=.3?"Vel gert!":"Góð tilraun!";
+  const pl=db.players[player]||(db.players[player]={total:0,games:0,best:{}});
+  pl.total+=score;pl.games++;
+  save();
+  $("endtxt").textContent=player+", þú svaraðir "+score+" af "+list.length+" rétt. Þú átt nú "+pl.total+" stig samtals!";
+  const s=p===1?3:p>=.6?2:p>=.3?1:0;
+  $("stars").textContent="⭐".repeat(s)+"☆".repeat(3-s);
+  show("end");
+  if(p>=.6){confetti(320);floaters(14)}
+}
+
+renderHome();
+
+// Konfetti
+const cv=$("fx"),cx=cv.getContext("2d");
+let parts=[],running=false;
+const resize=()=>{cv.width=innerWidth;cv.height=innerHeight};
+addEventListener("resize",resize);resize();
+const COL=["#ff5fa2","#ffd23f","#2fbf71","#1e90d6","#7c5cff","#ff7a3d"];
+function confetti(n){
+  if(matchMedia("(prefers-reduced-motion:reduce)").matches)return;
+  for(let i=0;i<n;i++){
+    const a=Math.random()*Math.PI*2,v=6+Math.random()*10;
+    parts.push({x:innerWidth/2,y:innerHeight*.4,vx:Math.cos(a)*v,vy:Math.sin(a)*v-6,w:6+Math.random()*7,h:4+Math.random()*6,r:Math.random()*6,vr:(Math.random()-.5)*.4,c:rnd(COL),life:110+Math.random()*60});
+  }
+  if(!running){running=true;requestAnimationFrame(tick)}
+}
+function tick(){
+  cx.clearRect(0,0,cv.width,cv.height);
+  parts.forEach(p=>{
+    p.vy+=.28;p.vx*=.99;p.x+=p.vx;p.y+=p.vy;p.r+=p.vr;p.life--;
+    cx.save();cx.translate(p.x,p.y);cx.rotate(p.r);cx.fillStyle=p.c;cx.fillRect(-p.w/2,-p.h/2,p.w,p.h);cx.restore();
+  });
+  parts=parts.filter(p=>p.life>0&&p.y<cv.height+40);
+  if(parts.length)requestAnimationFrame(tick);else{running=false;cx.clearRect(0,0,cv.width,cv.height)}
+}
+function floaters(n){
+  for(let i=0;i<n;i++){
+    const s=document.createElement("span");
+    s.className="float";s.textContent=rnd(FLY);
+    s.style.left=(Math.random()*92)+"vw";
+    s.style.animationDelay=(Math.random()*.8)+"s";
+    s.style.fontSize=(2+Math.random()*2.5)+"rem";
+    document.body.appendChild(s);
+    setTimeout(()=>s.remove(),3600);
+  }
+}
+</script>
+</body>
+</html>
